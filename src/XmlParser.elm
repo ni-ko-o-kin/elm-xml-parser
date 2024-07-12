@@ -26,7 +26,7 @@ module XmlParser exposing
 import Char
 import Dict exposing (Dict)
 import Hex
-import Parser as Parser
+import Parser
 import Parser.Advanced as Advanced exposing ((|.), (|=), Nestable(..), Step(..), andThen, chompUntil, chompWhile, getChompedString, inContext, int, lazy, loop, map, multiComment, oneOf, problem, succeed, token)
 import Set exposing (Set)
 
@@ -629,7 +629,12 @@ formatNode node =
         Element tagName_ attributes_ children_ ->
             "<"
                 ++ escape tagName_
-                ++ " "
+                ++ (if attributes_ == [] then
+                        ""
+
+                    else
+                        " "
+                   )
                 ++ (attributes_ |> List.map formatAttribute |> String.join " ")
                 ++ (if children_ == [] then
                         "/>"

@@ -2,7 +2,7 @@ module XmlParserTest exposing (expectDocType, expectFail, expectPI, expectSuccee
 
 import Expect exposing (Expectation)
 import Fuzz exposing (int, list, string)
-import Parser as Parser
+import Parser
 import Parser.Advanced exposing ((|.))
 import Test exposing (..)
 import XmlParser exposing (..)
@@ -66,6 +66,12 @@ testFormat xml =
                             Expect.fail ""
                 --(Parser.deadEndsToString e)
                )
+
+
+testFormatStr : Xml -> String -> (() -> Expectation)
+testFormatStr xml expected =
+    \_ ->
+        Expect.equal (XmlParser.format xml) expected
 
 
 suite : Test
@@ -183,12 +189,18 @@ suite =
                     Nothing
                     (Element "a" [] [])
                 )
+        , test "format to string 1" <| testFormatStr (Xml [] Nothing <| Element "a" [] []) "<a/>"
+        , test "format to string 2" <| testFormatStr (Xml [] Nothing <| Element "a" [] [ Text "abc" ]) "<a>abc</a>"
+        , test "format to string 3" <| testFormatStr (Xml [] Nothing <| Element "a" [ Attribute "name" "abc" ] []) "<a name=\"abc\"/>"
+        , test "format to string 4" <| testFormatStr (Xml [] Nothing <| Element "a" [ Attribute "name" "abc" ] [ Text "123" ]) "<a name=\"abc\">123</a>"
         ]
 
 
 deadEndsToString : List (Parser.Advanced.DeadEnd String Parser.Problem) -> String
 deadEndsToString deadends =
     String.join " " (List.map (\deadend -> "{ row = " ++ String.fromInt deadend.row ++ ", col = " ++ String.fromInt deadend.col ++ ", " ++ Debug.toString deadend.problem ++ "}") deadends)
+
+
 
 {-
    For referrence
